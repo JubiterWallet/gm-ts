@@ -4,7 +4,7 @@ import { SM2 } from './sm2';
 import { SM3 } from './sm3';
 
 export function computeZDigest(
-  data: string | ArrayBuffer,
+  data: string | Buffer,
   pubKey: string | Buffer | ec.KeyPair,
   {
     dataEncoding,
@@ -15,7 +15,7 @@ export function computeZDigest(
     keyEncoding?: string;
     hashEncoding?: 'hex';
   }
-): ArrayBuffer | string {
+): Buffer | string {
   // e = sm3(Z||msg)
   const sm3 = new SM3();
   sm3.update(Z(pubKey, { keyEncoding }));
@@ -26,7 +26,7 @@ export function computeZDigest(
 export function Z(
   key: string | Buffer | ec.KeyPair,
   { keyEncoding, hashEncoding }: { keyEncoding?: string; hashEncoding?: 'hex' }
-): ArrayBuffer | string {
+): Buffer | string {
   // Z = h(ENTL || ID || a || b || xG || yG || xA || yA)
   const sm2 = new SM2();
   //const curve = sm2.curve as curve.short;
@@ -34,7 +34,7 @@ export function Z(
   const id = '1234567812345678';
   const sm3 = new SM3();
   const idLen = id.length * 8;
-  const entl = new Uint8Array(2);
+  const entl = Buffer.alloc(2);
   entl[0] = idLen >>> 8;
   entl[1] = idLen & 0xff;
   sm3.update(entl);

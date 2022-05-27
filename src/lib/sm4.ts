@@ -2,27 +2,24 @@ export class SM4 {
   readonly BLOCK_SIZE = 16;
   readonly SM4_KEY_SCHEDULE = 32;
   rk?: number[];
-  constructor(key?: string | ArrayBuffer, encoding?: 'utf8' | 'hex') {
+  constructor(key?: string | Buffer, encoding?: 'utf8' | 'hex') {
     if (key) {
       this.setKey(key, encoding);
     }
   }
 
-  setKey(key: string | ArrayBuffer, encoding?: 'utf8' | 'hex') {
-    let buf: Buffer;
+  setKey(key: string | Buffer, encoding?: 'utf8' | 'hex') {
     if (typeof key === 'string') {
-      buf = Buffer.from(key, encoding);
-    } else {
-      buf = Buffer.from(key);
+      key = Buffer.from(key, encoding);
     }
-    if (buf.length < 16) {
+    if (key.length < 16) {
       throw 'invalid key, byte size of key must bigger than 16';
     }
     const K = new Array<number>(4);
-    K[0] = buf.readUInt32BE(0) ^ FK[0];
-    K[1] = buf.readUInt32BE(4) ^ FK[1];
-    K[2] = buf.readUInt32BE(8) ^ FK[2];
-    K[3] = buf.readUInt32BE(12) ^ FK[3];
+    K[0] = key.readUInt32BE(0) ^ FK[0];
+    K[1] = key.readUInt32BE(4) ^ FK[1];
+    K[2] = key.readUInt32BE(8) ^ FK[2];
+    K[3] = key.readUInt32BE(12) ^ FK[3];
     this.rk = new Array<number>(this.SM4_KEY_SCHEDULE);
 
     for (let i = 0; i !== this.SM4_KEY_SCHEDULE; i++) {
@@ -39,24 +36,20 @@ export class SM4 {
   }
 
   encrypt(
-    data: string | ArrayBuffer,
+    data: string | Buffer,
     encoding?: 'utf8' | 'hex',
     outEncoding?: 'utf8' | 'hex'
-  ): string | ArrayBuffer {
+  ): string | Buffer {
     if (!this.rk) {
       throw 'setKey first';
     }
-    let buf: Buffer;
     if (typeof data === 'string') {
-      buf = Buffer.from(data, encoding);
-    } else {
-      buf = Buffer.from(data);
+      data = Buffer.from(data, encoding);
     }
-
-    let B0 = buf.readUInt32BE(0);
-    let B1 = buf.readUInt32BE(4);
-    let B2 = buf.readUInt32BE(8);
-    let B3 = buf.readUInt32BE(12);
+    let B0 = data.readUInt32BE(0);
+    let B1 = data.readUInt32BE(4);
+    let B2 = data.readUInt32BE(8);
+    let B3 = data.readUInt32BE(12);
     const rk = this.rk;
 
     // @ts-ignore like macro in C
@@ -76,34 +69,30 @@ export class SM4 {
     SM4_RNDS(24, 25, 26, 27, SM4_T);
     SM4_RNDS(28, 29, 30, 31, SM4_T_slow);
 
-    buf = Buffer.alloc(16);
-    const view = new DataView(buf.buffer);
+    data = Buffer.alloc(16);
+    const view = new DataView(data.buffer);
     view.setUint32(0, B3);
     view.setUint32(4, B2);
     view.setUint32(8, B1);
     view.setUint32(12, B0);
-    return outEncoding ? buf.toString(encoding) : buf.buffer;
+    return outEncoding ? data.toString(encoding) : data;
   }
 
   decrypt(
-    data: string | ArrayBuffer,
+    data: string | Buffer,
     encoding?: 'utf8' | 'hex',
     outEncoding?: string
-  ): string | ArrayBuffer {
+  ): string | Buffer {
     if (!this.rk) {
       throw 'setKey first';
     }
-    let buf: Buffer;
     if (typeof data === 'string') {
-      buf = Buffer.from(data, encoding);
-    } else {
-      buf = Buffer.from(data);
+      data = Buffer.from(data, encoding);
     }
-
-    let B0 = buf.readUInt32BE(0);
-    let B1 = buf.readUInt32BE(4);
-    let B2 = buf.readUInt32BE(8);
-    let B3 = buf.readUInt32BE(12);
+    let B0 = data.readUInt32BE(0);
+    let B1 = data.readUInt32BE(4);
+    let B2 = data.readUInt32BE(8);
+    let B3 = data.readUInt32BE(12);
     const rk = this.rk;
     // @ts-ignore like macro in C
     const SM4_RNDS = (k0, k1, k2, k3, F) => {
@@ -122,13 +111,13 @@ export class SM4 {
     SM4_RNDS(7, 6, 5, 4, SM4_T);
     SM4_RNDS(3, 2, 1, 0, SM4_T_slow);
 
-    buf = Buffer.alloc(16);
-    const view = new DataView(buf.buffer);
+    data = Buffer.alloc(16);
+    const view = new DataView(data.buffer);
     view.setUint32(0, B3);
     view.setUint32(4, B2);
     view.setUint32(8, B1);
     view.setUint32(12, B0);
-    return outEncoding ? buf.toString(encoding) : buf.buffer;
+    return outEncoding ? data.toString(encoding) : data;
   }
 }
 

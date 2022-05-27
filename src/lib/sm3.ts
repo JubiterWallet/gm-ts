@@ -17,7 +17,7 @@ export class SM3 {
   // big-ending byte length
   total = new ArrayBuffer(16);
 
-  update(data: string | ArrayBuffer, encoding?: 'utf8' | 'hex') {
+  update(data: string | Buffer, encoding?: 'utf8' | 'hex') {
     let dataView;
     if (typeof data === 'string') {
       if (data.length === 0) {
@@ -85,7 +85,7 @@ export class SM3 {
     }
   }
 
-  final(encoding?: 'hex'): ArrayBuffer | string {
+  final(encoding?: 'hex'): Buffer | string {
     let block = new Uint8Array(this.BLOCK_SIZE);
     let n = 0;
     if (this.cache) {
@@ -115,7 +115,7 @@ export class SM3 {
     view.setUint32(this.BLOCK_SIZE - 4, l);
     this.blockProcess(block);
 
-    const d = new Uint8Array(32);
+    const d = Buffer.alloc(32);
     view = new DataView(d.buffer);
 
     const { A, B, C, D, E, F, G, H } = this.state;
@@ -131,8 +131,7 @@ export class SM3 {
       return d;
     }
 
-    const buf = Buffer.from(d);
-    return buf.toString(encoding);
+    return encoding ? d.toString(encoding) : d;
   }
 
   private blockProcess(block: Uint8Array) {
