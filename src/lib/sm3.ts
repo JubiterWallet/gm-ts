@@ -95,7 +95,7 @@ export class SM3 {
     }
     block[n] = 0x80;
     n += 1;
-    if (n > this.BLOCK_SIZE) {
+    if (n > this.BLOCK_SIZE - 8) {
       this.blockProcess(block);
       n = 0;
       block = new Uint8Array(this.BLOCK_SIZE);

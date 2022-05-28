@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export declare class SM3 {
     readonly BLOCK_SIZE: 64;
     state: {
@@ -12,7 +13,7 @@ export declare class SM3 {
     };
     cache?: Uint8Array;
     total: ArrayBuffer;
-    update(data: string | ArrayBuffer, encoding?: 'utf8' | 'hex'): void;
-    final(encoding?: 'hex'): ArrayBuffer | string;
+    update(data: string | Buffer, encoding?: 'utf8' | 'hex'): void;
+    final(encoding?: 'hex'): Buffer | string;
     private blockProcess;
 }
