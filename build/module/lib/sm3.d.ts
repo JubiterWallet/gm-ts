@@ -11,8 +11,8 @@ export declare class SM3 {
         G: number;
         H: number;
     };
-    cache?: Uint8Array;
-    total: ArrayBuffer;
+    cache?: Buffer;
+    total: Buffer;
     update(data: string | Buffer, encoding?: 'utf8' | 'hex'): void;
     final(encoding?: 'hex'): Buffer | string;
     private blockProcess;
