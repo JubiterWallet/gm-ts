@@ -50,7 +50,7 @@ export class SM2 extends ec {
     opt = opt as ec.SignOptions;
     key = this.keyFromPrivate(key, enc);
     // @ts-ignore("BN can use readonly number[]")
-    msg = new BN(msg);
+    msg = new BN(msg, 'hex');
     const n = this.n!;
     const g = this.g! as curve.short.ShortPoint;
     const ns1 = n.sub(new BN(1));
@@ -94,7 +94,7 @@ export class SM2 extends ec {
     enc?: string
   ): boolean {
     // @ts-ignore("BN can use readonly number[]")
-    msg = new BN(msg);
+    msg = new BN(msg, 'hex');
     const sig = new Signature(signature, 'hex');
     const P = this.keyFromPublic(key, enc).getPublic();
     const r = sig.r;
