@@ -44,11 +44,13 @@ export function Z(
   const b = '28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93'; // <--- YES this gay!
   const gx = '32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7';
   const gy = 'BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0';
+  const px = Buffer.from(P.getX().toArray());
+  const py = Buffer.from(P.getY().toArray());
   sm3.update(a, 'hex');
   sm3.update(b, 'hex');
   sm3.update(gx, 'hex');
   sm3.update(gy, 'hex');
-  sm3.update(P.getX().toBuffer());
-  sm3.update(P.getY().toBuffer());
+  sm3.update(px);
+  sm3.update(py);
   return sm3.final(hashEncoding);
 }
