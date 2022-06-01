@@ -30,15 +30,15 @@ class SM3 {
         const len = data.length;
         let n = 0;
         // update total
-        let h = this.total.readUint32BE(0);
-        let l = this.total.readUint32BE(4);
+        let h = this.total.readUInt32BE(0);
+        let l = this.total.readUInt32BE(4);
         l += len;
         l = l >>> 0;
         if (l < len) {
             h += 1;
         }
-        this.total.writeUint32BE(U32(h), 0);
-        this.total.writeUint32BE(U32(l), 4);
+        this.total.writeUInt32BE(U32(h), 0);
+        this.total.writeUInt32BE(U32(l), 4);
         if (this.cache) {
             n = this.cache.length;
             if (len >= this.BLOCK_SIZE || len + n >= this.BLOCK_SIZE) {
@@ -84,45 +84,45 @@ class SM3 {
             block.fill(0);
         }
         // bit length
-        let h = this.total.readUint32BE(0);
-        let l = this.total.readUint32BE(4);
+        let h = this.total.readUInt32BE(0);
+        let l = this.total.readUInt32BE(4);
         this.total.fill(0);
         h = (h << 3) | (l >>> 29);
         l = l << 3;
-        block.writeUint32BE(U32(h), this.BLOCK_SIZE - 8);
-        block.writeUint32BE(U32(l), this.BLOCK_SIZE - 4);
+        block.writeUInt32BE(U32(h), this.BLOCK_SIZE - 8);
+        block.writeUInt32BE(U32(l), this.BLOCK_SIZE - 4);
         this.blockProcess(block);
         const d = Buffer.alloc(32);
         const { A, B, C, D, E, F, G, H } = this.state;
-        d.writeUint32BE(U32(A), 0);
-        d.writeUint32BE(U32(B), 4);
-        d.writeUint32BE(U32(C) >>> 0, 8);
-        d.writeUint32BE(U32(D), 12);
-        d.writeUint32BE(U32(E), 16);
-        d.writeUint32BE(U32(F), 20);
-        d.writeUint32BE(U32(G), 24);
-        d.writeUint32BE(U32(H), 28);
+        d.writeUInt32BE(U32(A), 0);
+        d.writeUInt32BE(U32(B), 4);
+        d.writeUInt32BE(U32(C) >>> 0, 8);
+        d.writeUInt32BE(U32(D), 12);
+        d.writeUInt32BE(U32(E), 16);
+        d.writeUInt32BE(U32(F), 20);
+        d.writeUInt32BE(U32(G), 24);
+        d.writeUInt32BE(U32(H), 28);
         return encoding ? d.toString(encoding) : d;
     }
     blockProcess(block) {
         let A, B, C, D, E, F, G, H;
         ({ A, B, C, D, E, F, G, H } = this.state);
-        let W00 = block.readUint32BE(0);
-        let W01 = block.readUint32BE(4);
-        let W02 = block.readUint32BE(8);
-        let W03 = block.readUint32BE(12);
-        let W04 = block.readUint32BE(16);
-        let W05 = block.readUint32BE(20);
-        let W06 = block.readUint32BE(24);
-        let W07 = block.readUint32BE(28);
-        let W08 = block.readUint32BE(32);
-        let W09 = block.readUint32BE(36);
-        let W10 = block.readUint32BE(40);
-        let W11 = block.readUint32BE(44);
-        let W12 = block.readUint32BE(48);
-        let W13 = block.readUint32BE(52);
-        let W14 = block.readUint32BE(56);
-        let W15 = block.readUint32BE(60);
+        let W00 = block.readUInt32BE(0);
+        let W01 = block.readUInt32BE(4);
+        let W02 = block.readUInt32BE(8);
+        let W03 = block.readUInt32BE(12);
+        let W04 = block.readUInt32BE(16);
+        let W05 = block.readUInt32BE(20);
+        let W06 = block.readUInt32BE(24);
+        let W07 = block.readUInt32BE(28);
+        let W08 = block.readUInt32BE(32);
+        let W09 = block.readUInt32BE(36);
+        let W10 = block.readUInt32BE(40);
+        let W11 = block.readUInt32BE(44);
+        let W12 = block.readUInt32BE(48);
+        let W13 = block.readUInt32BE(52);
+        let W14 = block.readUInt32BE(56);
+        let W15 = block.readUInt32BE(60);
         [B, D, F, H] = R1(A, B, C, D, E, F, G, H, 0x79cc4519, W00, W00 ^ W04);
         W00 = EXPAND(W00, W07, W13, W03, W10);
         [A, C, E, G] = R1(D, A, B, C, H, E, F, G, 0xf3988a32, W01, W01 ^ W05);
