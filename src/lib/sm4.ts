@@ -16,10 +16,11 @@ export class SM4 {
       throw 'invalid key, byte size of key must bigger than 16';
     }
     const K = new Array<number>(4);
-    K[0] = key.readUInt32BE(0) ^ FK[0];
-    K[1] = key.readUInt32BE(4) ^ FK[1];
-    K[2] = key.readUInt32BE(8) ^ FK[2];
-    K[3] = key.readUInt32BE(12) ^ FK[3];
+    const view = new DataView(key.buffer, key.byteOffset);
+    K[0] = view.getUint32(0) ^ FK[0];
+    K[1] = view.getUint32(4) ^ FK[1];
+    K[2] = view.getUint32(8) ^ FK[2];
+    K[3] = view.getUint32(12) ^ FK[3];
     this.rk = new Array<number>(this.SM4_KEY_SCHEDULE);
 
     for (let i = 0; i !== this.SM4_KEY_SCHEDULE; i++) {
@@ -46,10 +47,11 @@ export class SM4 {
     if (typeof data === 'string') {
       data = Buffer.from(data, encoding);
     }
-    let B0 = data.readUInt32BE(0);
-    let B1 = data.readUInt32BE(4);
-    let B2 = data.readUInt32BE(8);
-    let B3 = data.readUInt32BE(12);
+    let view = new DataView(data.buffer, data.byteOffset);
+    let B0 = view.getUint32(0);
+    let B1 = view.getUint32(4);
+    let B2 = view.getUint32(8);
+    let B3 = view.getUint32(12);
     const rk = this.rk;
 
     // @ts-ignore like macro in C
@@ -70,7 +72,7 @@ export class SM4 {
     SM4_RNDS(28, 29, 30, 31, SM4_T_slow);
 
     data = Buffer.alloc(16);
-    const view = new DataView(data.buffer);
+    view = new DataView(data.buffer, data.byteOffset);
     view.setUint32(0, B3);
     view.setUint32(4, B2);
     view.setUint32(8, B1);
@@ -89,10 +91,11 @@ export class SM4 {
     if (typeof data === 'string') {
       data = Buffer.from(data, encoding);
     }
-    let B0 = data.readUInt32BE(0);
-    let B1 = data.readUInt32BE(4);
-    let B2 = data.readUInt32BE(8);
-    let B3 = data.readUInt32BE(12);
+    let view = new DataView(data.buffer, data.byteOffset);
+    let B0 = view.getUint32(0);
+    let B1 = view.getUint32(4);
+    let B2 = view.getUint32(8);
+    let B3 = view.getUint32(12);
     const rk = this.rk;
     // @ts-ignore like macro in C
     const SM4_RNDS = (k0, k1, k2, k3, F) => {
@@ -112,7 +115,7 @@ export class SM4 {
     SM4_RNDS(3, 2, 1, 0, SM4_T_slow);
 
     data = Buffer.alloc(16);
-    const view = new DataView(data.buffer);
+    view = new DataView(data.buffer, data.byteOffset);
     view.setUint32(0, B3);
     view.setUint32(4, B2);
     view.setUint32(8, B1);

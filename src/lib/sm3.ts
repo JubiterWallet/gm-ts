@@ -27,15 +27,16 @@ export class SM3 {
     const len = data.length;
     let n = 0;
     // update total
-    let h = this.total.readUInt32BE(0);
-    let l = this.total.readUInt32BE(4);
+    const view = new DataView(this.total.buffer, this.total.byteOffset);
+    let h = view.getUint32(0);
+    let l = view.getUint32(4);
     l += len;
     l = l >>> 0;
     if (l < len) {
       h += 1;
     }
-    this.total.writeUInt32BE(U32(h), 0);
-    this.total.writeUInt32BE(U32(l), 4);
+    view.setUint32(0, h);
+    view.setUint32(4, l);
     if (this.cache) {
       n = this.cache.length;
       if (len >= this.BLOCK_SIZE || len + n >= this.BLOCK_SIZE) {
@@ -63,7 +64,7 @@ export class SM3 {
       data.length >= this.BLOCK_SIZE;
       data = data.subarray(this.BLOCK_SIZE)
     ) {
-      this.blockProcess(data.subarray(0, this.BLOCK_SIZE));
+      this.blockProcess(data);
     }
 
     if (data.length > 0) {
@@ -88,74 +89,92 @@ export class SM3 {
       block.fill(0);
     }
 
+    let view: DataView;
+    view = new DataView(this.total.buffer, this.total.byteOffset);
     // bit length
-    let h = this.total.readUInt32BE(0);
-    let l = this.total.readUInt32BE(4);
+    let h = view.getUint32(0);
+    let l = view.getUint32(4);
     this.total.fill(0);
 
     h = (h << 3) | (l >>> 29);
     l = l << 3;
-    block.writeUInt32BE(U32(h), this.BLOCK_SIZE - 8);
-    block.writeUInt32BE(U32(l), this.BLOCK_SIZE - 4);
+    view = new DataView(block.buffer, block.byteOffset);
+    view.setUint32(this.BLOCK_SIZE - 8, h);
+    view.setUint32(this.BLOCK_SIZE - 4, l);
     this.blockProcess(block);
 
     const d = Buffer.alloc(32);
+    view = new DataView(d.buffer, d.byteOffset);
     const { A, B, C, D, E, F, G, H } = this.state;
-    d.writeUInt32BE(U32(A), 0);
-    d.writeUInt32BE(U32(B), 4);
-    d.writeUInt32BE(U32(C) >>> 0, 8);
-    d.writeUInt32BE(U32(D), 12);
-    d.writeUInt32BE(U32(E), 16);
-    d.writeUInt32BE(U32(F), 20);
-    d.writeUInt32BE(U32(G), 24);
-    d.writeUInt32BE(U32(H), 28);
+    view.setUint32(0, A);
+    view.setUint32(4, B);
+    view.setUint32(8, C);
+    view.setUint32(12, D);
+    view.setUint32(16, E);
+    view.setUint32(20, F);
+    view.setUint32(24, G);
+    view.setUint32(28, H);
     return encoding ? d.toString(encoding) : d;
   }
 
   private blockProcess(block: Buffer) {
     let A, B, C, D, E, F, G, H;
     ({ A, B, C, D, E, F, G, H } = this.state);
-    let W00 = block.readUInt32BE(0);
-    let W01 = block.readUInt32BE(4);
-    let W02 = block.readUInt32BE(8);
-    let W03 = block.readUInt32BE(12);
-    let W04 = block.readUInt32BE(16);
-    let W05 = block.readUInt32BE(20);
-    let W06 = block.readUInt32BE(24);
-    let W07 = block.readUInt32BE(28);
-    let W08 = block.readUInt32BE(32);
-    let W09 = block.readUInt32BE(36);
-    let W10 = block.readUInt32BE(40);
-    let W11 = block.readUInt32BE(44);
-    let W12 = block.readUInt32BE(48);
-    let W13 = block.readUInt32BE(52);
-    let W14 = block.readUInt32BE(56);
-    let W15 = block.readUInt32BE(60);
+    const view = new DataView(block.buffer, block.byteOffset);
+    let W00 = view.getUint32(0);
+    let W01 = view.getUint32(4);
+    let W02 = view.getUint32(8);
+    let W03 = view.getUint32(12);
+    let W04 = view.getUint32(16);
+    let W05 = view.getUint32(20);
+    let W06 = view.getUint32(24);
+    let W07 = view.getUint32(28);
+    let W08 = view.getUint32(32);
+    let W09 = view.getUint32(36);
+    let W10 = view.getUint32(40);
+    let W11 = view.getUint32(44);
+    let W12 = view.getUint32(48);
+    let W13 = view.getUint32(52);
+    let W14 = view.getUint32(56);
+    let W15 = view.getUint32(60);
     [B, D, F, H] = R1(A, B, C, D, E, F, G, H, 0x79cc4519, W00, W00 ^ W04);
+
     W00 = EXPAND(W00, W07, W13, W03, W10);
     [A, C, E, G] = R1(D, A, B, C, H, E, F, G, 0xf3988a32, W01, W01 ^ W05);
+
     W01 = EXPAND(W01, W08, W14, W04, W11);
     [D, B, H, F] = R1(C, D, A, B, G, H, E, F, 0xe7311465, W02, W02 ^ W06);
+
     W02 = EXPAND(W02, W09, W15, W05, W12);
     [C, A, G, E] = R1(B, C, D, A, F, G, H, E, 0xce6228cb, W03, W03 ^ W07);
+
     W03 = EXPAND(W03, W10, W00, W06, W13);
     [B, D, F, H] = R1(A, B, C, D, E, F, G, H, 0x9cc45197, W04, W04 ^ W08);
+
     W04 = EXPAND(W04, W11, W01, W07, W14);
     [A, C, E, G] = R1(D, A, B, C, H, E, F, G, 0x3988a32f, W05, W05 ^ W09);
+
     W05 = EXPAND(W05, W12, W02, W08, W15);
     [D, B, H, F] = R1(C, D, A, B, G, H, E, F, 0x7311465e, W06, W06 ^ W10);
+
     W06 = EXPAND(W06, W13, W03, W09, W00);
     [C, A, G, E] = R1(B, C, D, A, F, G, H, E, 0xe6228cbc, W07, W07 ^ W11);
+
     W07 = EXPAND(W07, W14, W04, W10, W01);
     [B, D, F, H] = R1(A, B, C, D, E, F, G, H, 0xcc451979, W08, W08 ^ W12);
+
     W08 = EXPAND(W08, W15, W05, W11, W02);
     [A, C, E, G] = R1(D, A, B, C, H, E, F, G, 0x988a32f3, W09, W09 ^ W13);
+
     W09 = EXPAND(W09, W00, W06, W12, W03);
     [D, B, H, F] = R1(C, D, A, B, G, H, E, F, 0x311465e7, W10, W10 ^ W14);
+
     W10 = EXPAND(W10, W01, W07, W13, W04);
     [C, A, G, E] = R1(B, C, D, A, F, G, H, E, 0x6228cbce, W11, W11 ^ W15);
+
     W11 = EXPAND(W11, W02, W08, W14, W05);
     [B, D, F, H] = R1(A, B, C, D, E, F, G, H, 0xc451979c, W12, W12 ^ W00);
+
     W12 = EXPAND(W12, W03, W09, W15, W06);
     [A, C, E, G] = R1(D, A, B, C, H, E, F, G, 0x88a32f39, W13, W13 ^ W01);
     W13 = EXPAND(W13, W04, W10, W00, W07);
@@ -271,13 +290,9 @@ type State = {
 };
 
 // function logState(...states: number[]) {
-//   const ss = states.map((x) => x.toString(16).padStart(8, '0'));
+//   const ss = states.map((x) => (x >>> 0).toString(16).padStart(8, '0'));
 //   console.log(ss.join(' '));
 // }
-
-function U32(a: number): number {
-  return a >>> 0;
-}
 
 function ROTATE(a: number, n: number): number {
   return (a << n) | (a >>> (32 - n));
